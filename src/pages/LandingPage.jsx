@@ -19,10 +19,10 @@ const CompassIcon = ({ className = "w-4 h-4" }) => (
 
 // --- DATA LOKASI BOGOR ---
 const BOGOR_PINS = [
-  { id: 'wikrama', name: 'SMK Wikrama Bogor', sector: 'Bogor Timur', lat: '6.6453° S', long: '106.8438° E', top: '38%', left: '58%', elevation: '295m', desc: 'Analisis jangkauan angkutan umum & pemukiman.' },
-  { id: 'sman1', name: 'SMAN 1 Kota Bogor', sector: 'Bogor Tengah', lat: '6.5950° S', long: '106.7972° E', top: '28%', left: '42%', elevation: '260m', desc: 'Konsentrasi fokal zonasi pendidikan pusat kota.' },
-  { id: 'blankspot', name: 'Rekomendasi Tapak Baru', sector: 'Bogor Selatan', lat: '6.6210° S', long: '106.8120° E', top: '62%', left: '50%', elevation: '340m', desc: 'Kawasan prioritas penambahan fasilitas sekolah.' },
-  { id: 'bogorbarat', name: 'Koridor Bogor Barat', sector: 'Bogor Barat', lat: '6.5780° S', long: '106.7510° E', top: '42%', left: '26%', elevation: '210m', desc: 'Evaluasi aksesibilitas wilayah perbatasan.' }
+  { id: 'smpn1', name: 'SMPN 1 Kota Bogor', sector: 'Bogor Tengah', lat: '6.5932° S', long: '106.7932° E', top: '28%', left: '42%', elevation: '260m', desc: 'Konsentrasi fokal zonasi pendidikan SMP pusat kota.' },
+  { id: 'smpn2', name: 'SMPN 2 Kota Bogor', sector: 'Bogor Utara', lat: '6.5710° S', long: '106.8120° E', top: '38%', left: '58%', elevation: '280m', desc: 'Analisis jangkauan angkutan & aksesibilitas SMP Bantarjati.' },
+  { id: 'blankspot', name: 'Rekomendasi Tapak SMP Baru', sector: 'Bogor Selatan', lat: '6.6210° S', long: '106.8120° E', top: '62%', left: '50%', elevation: '340m', desc: 'Kawasan prioritas penambahan fasilitas SMP negeri/swasta.' },
+  { id: 'bogorbarat', name: 'Koridor SMP Bogor Barat', sector: 'Bogor Barat', lat: '6.5780° S', long: '106.7510° E', top: '42%', left: '26%', elevation: '210m', desc: 'Evaluasi aksesibilitas jenjang SMP wilayah perbatasan.' }
 ];
 
 export default function LandingPage() {

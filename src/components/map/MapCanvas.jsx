@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect, useMemo } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 import Map, {
   NavigationControl,
   Source,
@@ -57,7 +57,7 @@ function getScoreColor(score) {
   return "#10b981";                // Hijau (Cukup / Baik)
 }
 
-export default function MapCanvas() {
+export default function MapCanvas({ onMapLoaded }) {
   const mapRef = useRef();
 
   // State Store Global
@@ -104,71 +104,29 @@ export default function MapCanvas() {
     };
   }, [mcdaWeights]);
 
-  // Load 3D Buildings & Pencahayaan Peta
+  // Mapbox Standard sudah menyediakan pencahayaan dan bangunan 3D bawaan.
   const onMapLoad = useCallback((evt) => {
     const map = evt.target;
-    map.setLight({
-      anchor: "viewport",
-      color: "#ffffff",
-      intensity: 0.35,
-      position: [1.5, 90, 80],
-    });
+    map.setConfigProperty(
+      "basemap",
+      "show3dObjects",
+      activeLayers?.show3DBuildings !== false
+    );
 
-    if (map.getLayer("3d-buildings")) return;
-
-    map.addLayer({
-      id: "3d-buildings",
-      source: "composite",
-      "source-layer": "building",
-      filter: ["==", "extrude", "true"],
-      type: "fill-extrusion",
-      minzoom: 14,
-      paint: {
-        "fill-extrusion-color": [
-          "interpolate",
-          ["linear"],
-          ["get", "height"],
-          0,
-          "#e2e8f0",
-          15,
-          "#a7f3d0",
-          40,
-          "#2FA084",
-          80,
-          "#1F6F5F",
-        ],
-        "fill-extrusion-height": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          15,
-          0,
-          15.05,
-          ["get", "height"],
-        ],
-        "fill-extrusion-base": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          15,
-          0,
-          15.05,
-          ["get", "min_height"],
-        ],
-        "fill-extrusion-opacity": 0.85,
-      },
-    });
-  }, []);
+    if (typeof onMapLoaded === "function") {
+      onMapLoaded();
+    }
+  }, [activeLayers?.show3DBuildings, onMapLoaded]);
 
   // Toggle Visibility 3D Buildings
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current.getMap();
-    if (map.getStyle() && map.getLayer("3d-buildings")) {
-      map.setLayoutProperty(
-        "3d-buildings",
-        "visibility",
-        activeLayers?.show3DBuildings ? "visible" : "none"
+    if (map.isStyleLoaded()) {
+      map.setConfigProperty(
+        "basemap",
+        "show3dObjects",
+        activeLayers?.show3DBuildings !== false
       );
     }
   }, [activeLayers?.show3DBuildings]);
@@ -204,7 +162,13 @@ export default function MapCanvas() {
         ref={mapRef}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="mapbox://styles/mapbox/standard"
+        config={{
+          basemap: {
+            lightPreset: "day",
+            show3dObjects: activeLayers?.show3DBuildings !== false,
+          },
+        }}
         mapboxAccessToken={MAPBOX_TOKEN}
         onLoad={onMapLoad}
         terrain={{ source: "mapbox-dem", exaggeration: 1.2 }}
