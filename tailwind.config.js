@@ -12,11 +12,11 @@ export default {
         mist: "#d6ebff",
         canvas: "#f6f9ff",
         alert: { DEFAULT: "#ba1a1a", soft: "#ffd9d6" },
-  },
-  fontFamily: {
-    operator: ['"Public Sans"', "system-ui", "sans-serif"],
-  },
-},
+      },
+      fontFamily: {
+        operator: ['"Public Sans"', "system-ui", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };

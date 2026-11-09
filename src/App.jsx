@@ -7,6 +7,7 @@ import LandingPage from "./pages/HomePage";
 import Login from "./pages/auth/Login";
 import StakeholderDashboard from "./pages/stakeholder/StakeholderDashboard";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
+import OperatorLogin from "./pages/operator/OperatorLogin";
 import EksplorasiPeta from "./pages/public/EksplorasiPeta";
 
 // Import Komponen Loader & Transisi
@@ -57,6 +58,7 @@ export default function App() {
               index
               element={<Navigate to="/operator/dataset" replace />}
             />
+            <Route path="login" element={<OperatorLogin />} />
             <Route path="dataset" element={<OperatorDashboard />} />
           </Route>
 
