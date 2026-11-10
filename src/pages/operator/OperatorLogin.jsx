@@ -13,7 +13,7 @@ const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2c6e8e]';
 
 const inputClass = (invalid) =>
-  `h-11 w-full rounded-lg border px-[13px] text-sm text-[#173042] placeholder:text-[#6b7c88] ${FOCUS} ${
+  `h-11 w-full rounded-lg border px-[13px] text-sm text-[#173042] placeholder:text-[#445665] ${FOCUS} ${
     invalid ? 'border-[#a12b31] bg-[#fff0f0]' : 'border-[#d7e1e8] bg-white'
   }`;
 
@@ -45,7 +45,7 @@ export default function OperatorLogin() {
     try {
       await authenticate(email.trim(), password);
       login('operator');
-      navigate('/operator/dataset');
+      navigate('/operator/dashboard');
     } catch {
       setStatus('error');
     }
@@ -63,7 +63,7 @@ export default function OperatorLogin() {
       className="h-screen overflow-y-auto bg-[#edf3f6] [font-family:'Public_Sans',system-ui,sans-serif]"
     >
       <div className="flex min-h-full items-center justify-center p-4 sm:p-10">
-        <div className="grid w-full max-w-[920px] overflow-hidden rounded-[28px] border border-[#d7e1e8] bg-white shadow-[0_12px_30px_rgba(10,36,51,0.1)] lg:min-h-[640px] lg:grid-cols-[430px_1fr]">
+        <div className="grid w-full max-w-[1080px] overflow-hidden rounded-[28px] border border-[#d7e1e8] bg-white shadow-[0_12px_30px_rgba(10,36,51,0.1)] lg:min-h-[736px] lg:grid-cols-[430px_1fr]">
           <section
             aria-label="Tentang ruang kerja operator"
             className="flex flex-col bg-[#1b4965] p-8 text-white sm:p-[42px]"

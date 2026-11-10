@@ -10,9 +10,12 @@ import OperatorDashboard from "./pages/operator/OperatorDashboard";
 import OperatorLogin from "./pages/operator/OperatorLogin";
 import EksplorasiPeta from "./pages/public/EksplorasiPeta";
 
+
 // Import Komponen Loader & Transisi
 import AwwwardsLoader from "./components/ui/AwwwardsLoader";
 import PageTransition from "./components/ui/PageTransition";
+import OperatorLayout from "./components/operator/OperatorLayout";
+import OperatorDataset from "./pages/operator/OperatorDataset";
 
 // --- ROUTER UTAMA ---
 export default function App() {
@@ -53,15 +56,13 @@ export default function App() {
           </Route>
 
           {/* FLOW OPERATOR */}
-          <Route path="/operator">
-            <Route
-              index
-              element={<Navigate to="/operator/dataset" replace />}
-            />
-            <Route path="login" element={<OperatorLogin />} />
-            <Route path="dataset" element={<OperatorDashboard />} />
+          <Route path="/operator/login" element={<OperatorLogin />} />
+          <Route path="/operator" element={<OperatorLayout />}>
+          <Route index element={<Navigate to="/operator/dashboard" replace />} />
+          <Route path="dashboard" element={<OperatorDashboard />} />
+          <Route path="dataset" element={<OperatorDataset />} />
           </Route>
-
+          
           {/* FALLBACK 404 */}
           <Route
             path="*"

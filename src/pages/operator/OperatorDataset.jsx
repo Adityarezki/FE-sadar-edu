@@ -11,7 +11,7 @@ import {
   StatusPill,
   TD,
   TH,
-} from '../../components/operator/ui';
+} from '../../components/operator/Ui';
 
 const REQUIREMENTS = [
   { title: 'NPSN', text: 'String; nol di depan dipertahankan' },

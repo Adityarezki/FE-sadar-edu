@@ -1,5 +1,7 @@
 import { useState } from 'react';
+
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import logo from '../../assets/figma/logo-sadar.svg';
 import {
   Bell,
   ChartColumn,
@@ -16,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { FOCUS } from './ui';
+
 
 // Item tanpa `to` belum punya halaman, jadi tampil nonaktif.
 const NAV_ITEMS = [
@@ -37,7 +40,7 @@ function BrandMark() {
         </span>
       ) : (
         <img
-          src="/logo-sadar-edu.svg"
+          src={logo}
           alt=""
           width="34"
           height="34"
