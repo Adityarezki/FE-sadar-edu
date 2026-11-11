@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // Import Halaman
 import IntroPage from "./pages/IntroPage";
@@ -17,6 +17,30 @@ import PageTransition from "./components/ui/PageTransition";
 import OperatorLayout from "./components/operator/OperatorLayout";
 import OperatorDataset from "./pages/operator/OperatorDataset";
 
+// Halaman setelah login operator (tanpa halaman login) dianggap satu ruang kerja.
+const inWorkspace = (path) =>
+  path.startsWith("/operator") && !path.startsWith("/operator/login");
+
+// Transisi tetap jalan saat masuk dan keluar operator, tapi tidak saat
+// pindah menu di dalam ruang kerja operator.
+function GlobalTransition() {
+  const location = useLocation();
+  const [shown, setShown] = useState(location);
+
+  if (
+    shown !== location &&
+    !(inWorkspace(shown.pathname) && inWorkspace(location.pathname))
+  ) {
+    setShown(location);
+  }
+
+  return (
+    <Routes location={shown}>
+      <Route path="*" element={<PageTransition />} />
+    </Routes>
+  );
+}
+
 // --- ROUTER UTAMA ---
 export default function App() {
   // AwwwardsLoader aktif saat pertama kali masuk website dan saat refresh page
@@ -30,7 +54,7 @@ export default function App() {
       )}
 
       {/* 2. SAAT PINDAH-PINDAH PAGE (LANDING <-> PETA): Page Transition bergaya inspirasi user (AKSES KOTA Style) */}
-      <PageTransition />
+      <GlobalTransition />
 
       <div className="w-full min-h-screen bg-[#F8FAFC] font-sans text-slate-800 antialiased">
         <Routes>
