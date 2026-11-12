@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
@@ -7,7 +6,6 @@ import {
   BTN_OUTLINE,
   BTN_PRIMARY,
   CARD,
-  Dialog,
   EMPTY,
   FOCUS,
   MetricCard,
@@ -16,8 +14,6 @@ import {
   TH,
   formatTimestamp,
 } from '../../components/operator/ui';
-
-const SHOWN_ERRORS = 200;
 
 // Aturan dan ketentuan tampil sejak awal; angka terdampak menyusul setelah validasi.
 const DEFAULT_FINDINGS = [
@@ -45,7 +41,6 @@ export default function OperatorValidation() {
   const draft = useOperatorStore((state) => state.draft);
   const validation = useOperatorStore((state) => state.validation);
   const runValidation = useOperatorStore((state) => state.runValidation);
-  const [showErrors, setShowErrors] = useState(false);
 
   const hasResult = Boolean(validation);
   const findings = validation?.findings ?? DEFAULT_FINDINGS;
@@ -194,7 +189,7 @@ export default function OperatorValidation() {
         </p>
         <button
           type="button"
-          onClick={() => setShowErrors(true)}
+          onClick={() => navigate('/operator/validasi/perbaikan')}
           disabled={!hasResult || validation.errorsTotal === 0}
           className={`${BTN_OUTLINE} w-[198px] disabled:cursor-not-allowed disabled:opacity-50`}
         >
@@ -209,44 +204,6 @@ export default function OperatorValidation() {
           Lanjut ke review
         </button>
       </div>
-
-      {showErrors && hasResult && (
-        <Dialog title="Daftar error validasi" wide onClose={() => setShowErrors(false)}>
-          <p className="mt-1 text-xs leading-[18px] text-[#445665]">
-            Nomor baris mengikuti berkas sumber (baris 1 adalah judul kolom).
-          </p>
-          <div className="mt-4 max-h-[50vh] overflow-auto rounded-lg border border-[#d7e1e8]">
-            <table className="w-full text-left">
-              <thead className="sticky top-0">
-                <tr>
-                  <th scope="col" className={`${TH} w-[80px]`}>Baris</th>
-                  <th scope="col" className={`${TH} w-[160px]`}>Aturan</th>
-                  <th scope="col" className={TH}>Keterangan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {validation.errors.slice(0, SHOWN_ERRORS).map((item, index) => (
-                  <tr key={`${item.line}-${item.rule}-${index}`}>
-                    <td className={TD}>{item.line}</td>
-                    <td className={TD}>{item.rule}</td>
-                    <td className={`${TD} text-[#445665]`}>{item.message}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {validation.errorsTotal > SHOWN_ERRORS && (
-            <p className="mt-2 text-xs text-[#445665]">
-              Menampilkan {SHOWN_ERRORS} dari {validation.errorsTotal} error.
-            </p>
-          )}
-          <div className="mt-5 flex justify-end border-t border-[#d7e1e8] pt-4">
-            <button type="button" onClick={() => setShowErrors(false)} className={BTN_OUTLINE}>
-              Tutup
-            </button>
-          </div>
-        </Dialog>
-      )}
     </div>
   );
 }

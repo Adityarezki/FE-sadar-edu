@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Bell,
@@ -27,7 +27,10 @@ const NAV_ITEMS = [
 ];
 
 // Judul bar atas untuk halaman yang tidak punya item menu sendiri.
-const EXTRA_TITLES = { '/operator/dataset/impor': 'Impor & pemetaan' };
+const EXTRA_TITLES = {
+  '/operator/dataset/impor': 'Impor & pemetaan',
+  '/operator/validasi/perbaikan': 'Perbaiki data',
+};
 
 function BrandMark() {
   const [failed, setFailed] = useState(false);
@@ -57,6 +60,11 @@ export default function OperatorLayout() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 1024);
+
+  // Di layar kecil, sidebar menutup sendiri setelah pindah halaman.
+  useEffect(() => {
+    if (window.innerWidth < 1024) setCollapsed(true);
+  }, [pathname]);
 
   const pageTitle =
     EXTRA_TITLES[pathname] ??

@@ -106,11 +106,17 @@ export function validateRows(rows, mapping) {
     const name = read(row, 'name');
     if (npsn === '' || name === '') {
       affected.identitas += 1;
-      problems.push({ rule: 'Identitas', message: npsn === '' ? 'NPSN kosong' : 'Nama sekolah kosong' });
+      if (npsn === '') problems.push({ rule: 'Identitas', field: 'npsn', value: '', message: 'NPSN kosong' });
+      if (name === '') problems.push({ rule: 'Identitas', field: 'name', value: '', message: 'Nama sekolah kosong' });
     }
     if (npsn !== '' && !new RegExp(`^\\d{${NPSN_LENGTH}}$`).test(npsn)) {
       affected.npsn += 1;
-      problems.push({ rule: 'Format NPSN', message: `NPSN "${npsn}" bukan ${NPSN_LENGTH} digit` });
+      problems.push({
+        rule: 'Format NPSN',
+        field: 'npsn',
+        value: npsn,
+        message: `NPSN "${npsn}" bukan ${NPSN_LENGTH} digit`,
+      });
     }
 
     const latText = read(row, 'lat');
@@ -122,13 +128,23 @@ export function validateRows(rows, mapping) {
     if (!validPair) noMarker += 1;
     if (hasInput && !validPair) {
       affected.koordinat += 1;
-      problems.push({ rule: 'Koordinat', message: `Koordinat "${latText}, ${lngText}" tidak valid` });
+      problems.push({
+        rule: 'Koordinat',
+        field: 'koordinat',
+        value: [latText, lngText].filter((part) => part !== '').join(', '),
+        message: `Koordinat "${latText}, ${lngText}" tidak valid`,
+      });
     }
 
     const students = read(row, 'students');
     if (students !== '' && !/^\d+$/.test(students)) {
       affected.numerik += 1;
-      problems.push({ rule: 'Nilai numerik', message: `"${students}" bukan bilangan bulat` });
+      problems.push({
+        rule: 'Nilai numerik',
+        field: 'students',
+        value: students,
+        message: `"${students}" bukan bilangan bulat`,
+      });
     }
 
     if (problems.length > 0) {
@@ -167,4 +183,71 @@ export function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1).replace('.', ',')} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
+}
+
+export const FIELD_LABELS = {
+  npsn: 'NPSN',
+  name: 'Nama sekolah',
+  koordinat: 'Koordinat',
+  students: 'Peserta didik',
+};
+
+// Membaca "lintang, bujur" menjadi dua nilai teks. Teks kosong berarti koordinat dikosongkan.
+function parseCoordinatePair(text) {
+  const value = text.trim();
+  if (value === '') return { lat: '', lng: '' };
+
+  let parts = value.split(/\s*;\s*/);
+  if (parts.length !== 2) parts = value.split(/\s*,\s+/);
+  if (parts.length !== 2 && value.split(',').length === 2) parts = value.split(',');
+  if (parts.length !== 2) return null;
+
+  const lat = parseDecimal(parts[0]);
+  const lng = parseDecimal(parts[1]);
+  if (lat === null || lng === null || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat: String(lat), lng: String(lng) };
+}
+
+// Memeriksa usulan perbaikan. Hasilnya: { ok, message } atau { ok, patches }
+// dengan patches berisi kolom berkas yang akan diubah.
+export function validateProposal(field, text, mapping) {
+  const value = text.trim();
+
+  if (field === 'npsn') {
+    if (!new RegExp(`^\\d{${NPSN_LENGTH}}$`).test(value)) {
+      return { ok: false, message: `NPSN harus ${NPSN_LENGTH} digit angka.` };
+    }
+    return { ok: true, patches: [{ column: Number(mapping.npsn), value }] };
+  }
+
+  if (field === 'name') {
+    if (value === '') return { ok: false, message: 'Nama sekolah tidak boleh kosong.' };
+    return { ok: true, patches: [{ column: Number(mapping.name), value }] };
+  }
+
+  if (field === 'students') {
+    if (value !== '' && !/^\d+$/.test(value)) {
+      return { ok: false, message: 'Isi bilangan bulat, atau kosongkan.' };
+    }
+    return { ok: true, patches: [{ column: Number(mapping.students), value }] };
+  }
+
+  if (field === 'koordinat') {
+    if (mapping.lat === '' || mapping.lng === '') {
+      return { ok: false, message: 'Kolom Lintang dan Bujur belum dipetakan di halaman impor.' };
+    }
+    const pair = parseCoordinatePair(value);
+    if (!pair) {
+      return { ok: false, message: 'Tulis sebagai lintang, bujur (contoh -6.595, 106.816), atau kosongkan.' };
+    }
+    return {
+      ok: true,
+      patches: [
+        { column: Number(mapping.lat), value: pair.lat },
+        { column: Number(mapping.lng), value: pair.lng },
+      ],
+    };
+  }
+
+  return { ok: false, message: 'Jenis temuan ini belum bisa diperbaiki.' };
 }
