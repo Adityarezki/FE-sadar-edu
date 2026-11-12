@@ -2,26 +2,57 @@ import { create } from 'zustand';
 
 // TODO: ganti dengan data dari API backend. Untuk sementara tersimpan di memori
 // browser dan hilang saat halaman dimuat ulang.
+
+const fileLabel = (fileName) => fileName.replace(/\.[^.]+$/, '');
+
+function upsertVersion(versions, draft, status, at) {
+  const id = `V-${draft.fileName}`;
+  const next = {
+    id,
+    name: fileLabel(draft.fileName),
+    fileName: draft.fileName,
+    source: null,
+    period: null,
+    status,
+    updatedAt: at,
+  };
+  return versions.some((version) => version.id === id)
+    ? versions.map((version) => (version.id === id ? next : version))
+    : [next, ...versions];
+}
+
 export const useOperatorStore = create((set) => ({
   versions: [],
   activity: [],
+  draft: null,
+  validation: null,
 
-  importVersion: ({ name, source, period, fileName }) => {
-    const now = new Date().toISOString();
-    const stamp = Date.now();
-
+  saveDraft: (draft) => {
+    const at = new Date().toISOString();
     set((state) => ({
-      versions: [
-        { id: `V-${stamp}`, name, source, period, fileName, status: 'Menunggu validasi', importedAt: now },
-        ...state.versions,
+      draft,
+      versions: upsertVersion(state.versions, draft, 'Draf', at),
+      activity: [
+        { id: `A-${Date.now()}`, stage: 'Dataset', text: `Menyimpan draf ${draft.fileName}`, at, status: 'Draf' },
+        ...state.activity,
       ],
+    }));
+  },
+
+  runValidation: (draft, result) => {
+    const at = result.ranAt;
+    const status = result.needsFixRows > 0 ? 'Perlu perbaikan' : 'Siap ditinjau';
+    set((state) => ({
+      draft,
+      validation: { ...result, fileName: draft.fileName },
+      versions: upsertVersion(state.versions, draft, status, at),
       activity: [
         {
-          id: `A-${stamp}`,
-          stage: 'Dataset',
-          text: `Mengimpor ${name} (${fileName})`,
-          at: now,
-          status: 'Menunggu',
+          id: `A-${Date.now()}`,
+          stage: 'Validasi',
+          text: `Memvalidasi ${draft.fileName}: ${result.passedRows} dari ${result.totalRows} baris lolos`,
+          at,
+          status: result.needsFixRows > 0 ? 'Perlu perbaikan' : 'Selesai',
         },
         ...state.activity,
       ],

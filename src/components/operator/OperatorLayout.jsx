@@ -1,7 +1,5 @@
 import { useState } from 'react';
-
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../../assets/figma/logo-sadar.svg';
 import {
   Bell,
   ChartColumn,
@@ -19,15 +17,17 @@ import {
 import { useAuthStore } from '../../store/useAuthStore';
 import { FOCUS } from './ui';
 
-
 // Item tanpa `to` belum punya halaman, jadi tampil nonaktif.
 const NAV_ITEMS = [
   { label: 'Ringkasan', title: 'Dashboard', to: '/operator/dashboard', icon: House },
   { label: 'Dataset sekolah', title: 'Dataset sekolah', to: '/operator/dataset', icon: Database },
-  { label: 'Validasi data', icon: ShieldCheck },
+  { label: 'Validasi data', title: 'Validasi data', to: '/operator/validasi', icon: ShieldCheck },
   { label: 'Indikator & metadata', icon: ChartColumn },
   { label: 'Status pengajuan', icon: Clock },
 ];
+
+// Judul bar atas untuk halaman yang tidak punya item menu sendiri.
+const EXTRA_TITLES = { '/operator/dataset/impor': 'Impor & pemetaan' };
 
 function BrandMark() {
   const [failed, setFailed] = useState(false);
@@ -40,7 +40,7 @@ function BrandMark() {
         </span>
       ) : (
         <img
-          src={logo}
+          src="/logo-sadar-edu.svg"
           alt=""
           width="34"
           height="34"
@@ -58,7 +58,10 @@ export default function OperatorLayout() {
   const logout = useAuthStore((state) => state.logout);
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 1024);
 
-  const pageTitle = NAV_ITEMS.find((item) => item.to === pathname)?.title ?? 'Ruang kerja operator';
+  const pageTitle =
+    EXTRA_TITLES[pathname] ??
+    NAV_ITEMS.find((item) => item.to === pathname)?.title ??
+    'Ruang kerja operator';
   const hide = collapsed ? 'sr-only' : '';
   const itemShape = `relative flex h-[42px] items-center rounded-lg text-xs ${
     collapsed ? 'justify-center' : 'gap-[13px] px-[14px]'

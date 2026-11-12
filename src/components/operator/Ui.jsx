@@ -48,7 +48,7 @@ export function StatusPill({ children }) {
   );
 }
 
-export function Dialog({ title, onClose, focusRef, children }) {
+export function Dialog({ title, onClose, focusRef, wide = false, children }) {
   const boxRef = useRef(null);
   const titleId = useId();
 
@@ -77,11 +77,24 @@ export function Dialog({ title, onClose, focusRef, children }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 text-[#173042] shadow-xl outline-none"
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-white p-6 text-[#173042] shadow-xl outline-none ${
+          wide ? 'max-w-2xl' : 'max-w-md'
+        }`}
       >
         <h2 id={titleId} className="text-lg font-bold">{title}</h2>
         {children}
       </div>
+    </div>
+  );
+}
+
+export function MetricCard({ label, value, note, accent }) {
+  return (
+    <div className={`${CARD} relative min-h-[112px] overflow-hidden px-[17px] py-[17px]`}>
+      <span aria-hidden="true" className={`absolute left-0 top-0 h-full w-1 ${accent}`} />
+      <p className="text-xs leading-[18px] text-[#445665]">{label}</p>
+      <p className="mt-1.5 text-[28px] font-bold leading-9 text-[#173042]">{value}</p>
+      <p className="mt-1 text-[11px] font-medium leading-4 text-[#445665]">{note}</p>
     </div>
   );
 }

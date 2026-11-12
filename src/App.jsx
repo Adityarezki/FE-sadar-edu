@@ -9,6 +9,8 @@ import StakeholderDashboard from "./pages/stakeholder/StakeholderDashboard";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
 import OperatorLogin from "./pages/operator/OperatorLogin";
 import EksplorasiPeta from "./pages/public/EksplorasiPeta";
+import OperatorImport from "./pages/operator/OperatorImport";
+import OperatorValidation from "./pages/operator/OperatorValidation";
 
 
 // Import Komponen Loader & Transisi
@@ -82,9 +84,11 @@ export default function App() {
           {/* FLOW OPERATOR */}
           <Route path="/operator/login" element={<OperatorLogin />} />
           <Route path="/operator" element={<OperatorLayout />}>
-          <Route index element={<Navigate to="/operator/dashboard" replace />} />
-          <Route path="dashboard" element={<OperatorDashboard />} />
-          <Route path="dataset" element={<OperatorDataset />} />
+            <Route index element={<Navigate to="/operator/dashboard" replace />} />
+            <Route path="dashboard" element={<OperatorDashboard />} />
+            <Route path="dataset" element={<OperatorDataset />} />
+            <Route path="dataset/impor" element={<OperatorImport />} />
+            <Route path="validasi" element={<OperatorValidation />} />
           </Route>
           
           {/* FALLBACK 404 */}

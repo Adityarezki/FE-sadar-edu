@@ -5,6 +5,8 @@ import {
   BTN_PRIMARY,
   CARD,
   EMPTY,
+  FOCUS,
+  MetricCard,
   PageHeader,
   StatusPill,
   TD,
@@ -78,12 +80,39 @@ export default function OperatorDashboard() {
   const versions = useOperatorStore((state) => state.versions);
   const activity = useOperatorStore((state) => state.activity);
 
-  const readyForReview = versions.filter((version) => version.status === 'Menunggu validasi').length;
+  const validation = useOperatorStore((state) => state.validation);
+  const countByStatus = (status) => versions.filter((version) => version.status === status).length;
 
+  // Angka baru muncul setelah ada validasi, sebelum itu tampil penanda kosong.
   const metrics = [
     { label: 'Dataset aktif', value: EMPTY, note: 'Versi belum tersedia', accent: 'bg-[#1b4965]' },
-    { label: 'Siap ditinjau', value: readyForReview || EMPTY, note: 'Menunggu validasi', accent: 'bg-[#3fa796]' },
-    { label: 'Perlu perbaikan', value: EMPTY, note: 'Belum dihitung', accent: 'bg-[#85520c]' },
+    {
+      label: 'Siap ditinjau',
+      value: validation ? countByStatus('Siap ditinjau') : EMPTY,
+      note: validation ? 'Lolos validasi' : 'Menunggu validasi',
+      accent: 'bg-[#3fa796]',
+    },
+    {
+      label: 'Perlu perbaikan',
+      value: validation ? countByStatus('Perlu perbaikan') : EMPTY,
+      note: validation ? 'Dari validasi terakhir' : 'Belum dihitung',
+      accent: 'bg-[#85520c]',
+    },
+  ];
+
+  const alerts = [
+    validation
+      ? {
+          icon: TriangleAlert,
+          tone: 'bg-[#85520c]',
+          title: 'Validasi terakhir',
+          text:
+            validation.needsFixRows > 0
+              ? `${validation.needsFixRows} dari ${validation.totalRows} baris perlu perbaikan.`
+              : `Semua ${validation.totalRows} baris lolos aturan.`,
+        }
+      : ALERTS[0],
+    ...ALERTS.slice(1),
   ];
 
   return (
@@ -95,7 +124,7 @@ export default function OperatorDashboard() {
         action={
           <button
             type="button"
-            onClick={() => navigate('/operator/dataset')}
+            onClick={() => navigate('/operator/dataset/impor')}
             className={`${BTN_PRIMARY} w-[172px]`}
           >
             Impor dataset
@@ -107,12 +136,7 @@ export default function OperatorDashboard() {
         <div className="flex min-w-0 flex-col gap-4">
           <div className="grid gap-3.5 sm:grid-cols-3">
             {metrics.map((metric) => (
-              <div key={metric.label} className={`${CARD} relative min-h-[112px] overflow-hidden px-[17px] py-[17px]`}>
-                <span aria-hidden="true" className={`absolute left-0 top-0 h-full w-1 ${metric.accent}`} />
-                <p className="text-xs leading-[18px] text-[#445665]">{metric.label}</p>
-                <p className="mt-1.5 text-[28px] font-bold leading-9 text-[#173042]">{metric.value}</p>
-                <p className="mt-1 text-[11px] font-medium leading-4 text-[#445665]">{metric.note}</p>
-              </div>
+              <MetricCard key={metric.label} {...metric} />
             ))}
           </div>
 
@@ -140,7 +164,7 @@ export default function OperatorDashboard() {
             Aturan yang memerlukan tindakan operator.
           </p>
           <ul className="mt-5 flex flex-col gap-2.5">
-            {ALERTS.map(({ icon: Icon, tone, title, text }) => (
+            {alerts.map(({ icon: Icon, tone, title, text }) => (
               <li
                 key={title}
                 className="flex items-start gap-3 rounded-lg border border-[#d7e1e8] bg-[#edf3f6] p-3"
@@ -166,7 +190,12 @@ export default function OperatorDashboard() {
         <p className="text-xs leading-[18px] text-[#445665]">
           Perubahan dataset dan keputusan akan muncul di sini.
         </p>
-        <div className="mt-4 overflow-x-auto">
+        <div
+          role="region"
+          aria-label="Tabel aktivitas terbaru"
+          tabIndex={0}
+          className={`mt-4 overflow-x-auto ${FOCUS}`}
+        >
           <table className="w-full min-w-[640px] text-left">
             <thead>
               <tr>
