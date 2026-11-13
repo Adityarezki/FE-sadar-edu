@@ -10,6 +10,7 @@ import {
   parseCsv,
   validateRows,
 } from '../../lib/operatorImport';
+import { readXlsx } from '../../lib/operatorXlsx';
 import {
   BTN_OUTLINE,
   BTN_PRIMARY,
@@ -45,6 +46,7 @@ export default function OperatorImport() {
   const [mapping, setMapping] = useState(savedDraft?.mapping ?? {});
   const [error, setError] = useState('');
   const [dragging, setDragging] = useState(false);
+  const [reading, setReading] = useState(false);
   const [draftSaved, setDraftSaved] = useState(Boolean(savedDraft));
   const inputRef = useRef(null);
 
@@ -52,20 +54,22 @@ export default function OperatorImport() {
   const ready = hasFile && file.rows.length > 0 && isMappingComplete(mapping);
 
   const handleFile = async (selected) => {
-    if (!selected) return;
+    if (!selected || reading) return;
     const name = selected.name.toLowerCase();
+    const isXlsx = name.endsWith('.xlsx');
 
-    if (name.endsWith('.xlsx')) {
-      setError('Berkas XLSX belum dapat dibaca di halaman ini. Simpan sebagai CSV, lalu pilih lagi.');
+    if (name.endsWith('.xls')) {
+      setError('Format XLS lama belum didukung. Simpan sebagai XLSX atau CSV, lalu pilih lagi.');
       return;
     }
-    if (!name.endsWith('.csv')) {
+    if (!isXlsx && !name.endsWith('.csv')) {
       setError('Format tidak didukung. Pilih berkas CSV atau XLSX.');
       return;
     }
 
+    setReading(true);
     try {
-      const { headers, rows } = parseCsv(await selected.text());
+      const { headers, rows } = isXlsx ? await readXlsx(selected) : parseCsv(await selected.text());
       if (headers.length === 0) {
         setError('Berkas kosong. Pilih berkas yang berisi judul kolom dan data.');
         return;
@@ -75,7 +79,13 @@ export default function OperatorImport() {
       setDraftSaved(false);
       setError('');
     } catch {
-      setError('Berkas tidak dapat dibaca. Pastikan berkas CSV tidak rusak.');
+      setError(
+        isXlsx
+          ? 'Berkas XLSX tidak dapat dibaca. Pastikan berkasnya tidak rusak atau terkunci kata sandi.'
+          : 'Berkas tidak dapat dibaca. Pastikan berkas CSV tidak rusak.'
+      );
+    } finally {
+      setReading(false);
     }
   };
 
@@ -174,7 +184,8 @@ export default function OperatorImport() {
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className={`${BTN_OUTLINE} w-[178px]`}
+              disabled={reading}
+              className={`${BTN_OUTLINE} w-[178px] disabled:cursor-wait disabled:opacity-50`}
             >
               Pilih berkas
             </button>
@@ -182,8 +193,8 @@ export default function OperatorImport() {
 
           <div className="mt-5 border-t border-[#d7e1e8] pt-5">
             <p className="text-[11px] font-medium leading-4 text-[#445665]">Status berkas</p>
-            <p className="mt-2 break-words text-sm font-semibold leading-5">
-              {hasFile ? file.fileName : 'Belum ada berkas dipilih'}
+            <p aria-live="polite" className="mt-2 break-words text-sm font-semibold leading-5">
+              {reading ? 'Membaca berkas...' : hasFile ? file.fileName : 'Belum ada berkas dipilih'}
             </p>
             {hasFile && (
               <p className="mt-1 text-[11px] font-medium leading-4 text-[#445665]">
@@ -195,6 +206,10 @@ export default function OperatorImport() {
             )}
             <p className="mt-3 text-[11px] font-medium leading-4 text-[#445665]">
               Ukuran maksimum dan aturan format mengikuti kebijakan integrasi.
+            </p>
+            <p className="mt-2 text-[11px] font-medium leading-4 text-[#445665]">
+              Untuk XLSX, hanya lembar pertama yang dibaca. Format kolom NPSN sebagai Teks agar nol di depan
+              tidak hilang.
             </p>
             <div className="mt-4" aria-live="polite">
               <StatusPill>{draftSaved ? 'Draf tersimpan' : 'Draf'}</StatusPill>
