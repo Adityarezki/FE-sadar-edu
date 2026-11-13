@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, LockOpen, ShieldCheck } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
 import { PROVENANCE_FIELDS, getSubmissionGates } from '../../lib/operatorImport';
@@ -17,6 +18,7 @@ const FULL_WIDTH = ['attribution', 'note'];
 const fieldClass = `w-full rounded-md border border-[#d7e1e8] bg-[#edf3f6] px-[11px] text-xs text-[#173042] placeholder:text-[#445665] disabled:cursor-not-allowed disabled:text-[#445665] ${FOCUS}`;
 
 export default function OperatorReview() {
+  const navigate = useNavigate();
   const draft = useOperatorStore((state) => state.draft);
   const validation = useOperatorStore((state) => state.validation);
   const savedProvenance = useOperatorStore((state) => state.provenance);
@@ -45,6 +47,7 @@ export default function OperatorReview() {
   const handleSubmit = () => {
     submitForReview(values);
     setMessage('');
+    navigate('/operator/pengajuan/status');
   };
 
   return (
@@ -177,6 +180,13 @@ export default function OperatorReview() {
           <p id="catatan-kirim" className="mt-3 text-[11px] font-medium leading-4 text-[#445665]">
             Belum terhubung ke server. Pengajuan hanya tercatat di sesi ini.
           </p>
+          <button
+            type="button"
+            onClick={() => navigate('/operator/pengajuan/status')}
+            className={`${BTN_OUTLINE} mt-4 w-full`}
+          >
+            Lihat preview dan status
+          </button>
         </section>
       </div>
     </div>

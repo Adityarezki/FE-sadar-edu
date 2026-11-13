@@ -13,6 +13,7 @@ import OperatorImport from "./pages/operator/OperatorImport";
 import OperatorValidation from "./pages/operator/OperatorValidation";
 import OperatorRepair from "./pages/operator/OperatorRepair";
 import OperatorReview from "./pages/operator/OperatorReview";
+import OperatorStatus from "./pages/operator/OperatorStatus";
 
 
 
@@ -94,6 +95,7 @@ export default function App() {
             <Route path="validasi" element={<OperatorValidation />} />
             <Route path="validasi/perbaikan" element={<OperatorRepair />} />
             <Route path="pengajuan" element={<OperatorReview />} />
+            <Route path="status" element={<OperatorStatus />} />
           </Route>
           
           {/* FALLBACK 404 */}

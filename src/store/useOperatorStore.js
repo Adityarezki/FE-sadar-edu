@@ -22,10 +22,15 @@ function upsertVersion(versions, draft, status, at, provenance) {
     : [next, ...versions];
 }
 
+// Waktu draf dibuat tetap sama selama berkas yang dikerjakan tidak berganti.
+const draftTime = (state, draft, at) =>
+  state.draft && state.draft.fileName === draft.fileName && state.draftAt ? state.draftAt : at;
+
 export const useOperatorStore = create((set, get) => ({
   versions: [],
   activity: [],
   draft: null,
+  draftAt: null,
   validation: null,
   // Usulan perbaikan per temuan. Kunci: `${baris}:${kolom}`.
   corrections: {},
@@ -37,6 +42,7 @@ export const useOperatorStore = create((set, get) => ({
     const at = new Date().toISOString();
     set((state) => ({
       draft,
+      draftAt: draftTime(state, draft, at),
       submission: null,
       versions: upsertVersion(state.versions, draft, 'Draf', at, state.provenance),
       activity: [
@@ -51,6 +57,7 @@ export const useOperatorStore = create((set, get) => ({
     const status = result.needsFixRows > 0 ? 'Perlu perbaikan' : 'Siap ditinjau';
     set((state) => ({
       draft,
+      draftAt: draftTime(state, draft, at),
       corrections: {},
       submission: null,
       validation: { ...result, fileName: draft.fileName },

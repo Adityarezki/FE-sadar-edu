@@ -30,6 +30,7 @@ const NAV_ITEMS = [
 const EXTRA_TITLES = {
   '/operator/dataset/impor': 'Impor & pemetaan',
   '/operator/validasi/perbaikan': 'Perbaiki data',
+  '/operator/pengajuan/status': 'Preview & status',
 };
 
 function BrandMark() {

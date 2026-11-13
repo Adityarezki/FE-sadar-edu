@@ -292,3 +292,23 @@ export function getSubmissionGates({ draft, validation, provenance }) {
     { name: 'Atribusi tersedia', passed: filled(provenance.attribution), detail: '' },
   ];
 }
+
+// Ringkasan pratinjau publik dari draf: jumlah sekolah, yang punya marker, dan daftar awalnya.
+export function summarizePreview(draft, limit = 100) {
+  const { rows, mapping } = draft;
+  const read = (row, key) => (mapping[key] === '' ? '' : (row[Number(mapping[key])] ?? '').trim());
+  let withMarker = 0;
+  const preview = [];
+
+  rows.forEach((row) => {
+    const lat = parseDecimal(read(row, 'lat'));
+    const lng = parseDecimal(read(row, 'lng'));
+    const hasMarker = lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    if (hasMarker) withMarker += 1;
+    if (preview.length < limit) {
+      preview.push({ npsn: read(row, 'npsn'), name: read(row, 'name'), hasMarker });
+    }
+  });
+
+  return { total: rows.length, withMarker, withoutMarker: rows.length - withMarker, rows: preview };
+}
