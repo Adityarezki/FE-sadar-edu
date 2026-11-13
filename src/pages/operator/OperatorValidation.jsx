@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
-import { validateRows } from '../../lib/operatorImport';
+import { isProvenanceComplete, validateRows } from '../../lib/operatorImport';
 import {
   BTN_OUTLINE,
   BTN_PRIMARY,
@@ -41,10 +41,16 @@ export default function OperatorValidation() {
   const draft = useOperatorStore((state) => state.draft);
   const validation = useOperatorStore((state) => state.validation);
   const runValidation = useOperatorStore((state) => state.runValidation);
+  const provenance = useOperatorStore((state) => state.provenance);
 
   const hasResult = Boolean(validation);
   const findings = validation?.findings ?? DEFAULT_FINDINGS;
-  const gates = validation?.gates ?? DEFAULT_GATES;
+  // Gerbang Provenance mengikuti isian di halaman Review pengajuan.
+  const gates = (validation?.gates ?? DEFAULT_GATES).map((gate) =>
+    gate.name === 'Provenance'
+      ? { ...gate, status: isProvenanceComplete(provenance) ? 'Lulus' : 'Menunggu' }
+      : gate
+  );
 
   const handleRerun = () => {
     runValidation(draft, validateRows(draft.rows, draft.mapping));
@@ -185,7 +191,9 @@ export default function OperatorValidation() {
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <p id="catatan-review" className="mr-auto text-xs leading-[18px] text-[#445665]">
-          Halaman review belum tersedia.
+          {hasResult && validation.needsFixRows > 0
+            ? 'Masih ada baris yang perlu perbaikan. Pengajuan terkunci sampai semuanya lolos.'
+            : 'Lengkapi provenance dan atribusi di halaman review sebelum mengajukan.'}
         </p>
         <button
           type="button"
@@ -197,7 +205,8 @@ export default function OperatorValidation() {
         </button>
         <button
           type="button"
-          disabled
+          onClick={() => navigate('/operator/pengajuan')}
+          disabled={!hasResult}
           aria-describedby="catatan-review"
           className={`${BTN_PRIMARY} w-[212px] disabled:cursor-not-allowed disabled:opacity-50`}
         >

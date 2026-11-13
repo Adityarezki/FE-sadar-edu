@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { label: 'Dataset sekolah', title: 'Dataset sekolah', to: '/operator/dataset', icon: Database },
   { label: 'Validasi data', title: 'Validasi data', to: '/operator/validasi', icon: ShieldCheck },
   { label: 'Indikator & metadata', icon: ChartColumn },
-  { label: 'Status pengajuan', icon: Clock },
+  { label: 'Status pengajuan', title: 'Review pengajuan', to: '/operator/pengajuan', icon: Clock },
 ];
 
 // Judul bar atas untuk halaman yang tidak punya item menu sendiri.

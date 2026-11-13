@@ -37,11 +37,12 @@ const PLACEHOLDER_ROW = {
   status: 'Belum tersedia',
 };
 
-const STATUS_FILTERS = ['Draf', 'Perlu perbaikan', 'Siap ditinjau', 'Siap digunakan', 'Belum tersedia'];
+const STATUS_FILTERS = ['Draf', 'Perlu perbaikan', 'Siap ditinjau', 'Diajukan', 'Siap digunakan', 'Belum tersedia'];
 
 const STATUS_TONE = {
   'Siap digunakan': 'text-[#126552]',
   'Siap ditinjau': 'text-[#126552]',
+  Diajukan: 'text-[#2c6e8e]',
   'Perlu perbaikan': 'text-[#85520c]',
   'Belum tersedia': 'text-[#445665]',
 };

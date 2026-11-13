@@ -11,6 +11,8 @@ import OperatorLogin from "./pages/operator/OperatorLogin";
 import EksplorasiPeta from "./pages/public/EksplorasiPeta";
 import OperatorImport from "./pages/operator/OperatorImport";
 import OperatorValidation from "./pages/operator/OperatorValidation";
+import OperatorRepair from "./pages/operator/OperatorRepair";
+import OperatorReview from "./pages/operator/OperatorReview";
 
 
 
@@ -91,6 +93,7 @@ export default function App() {
             <Route path="dataset/impor" element={<OperatorImport />} />
             <Route path="validasi" element={<OperatorValidation />} />
             <Route path="validasi/perbaikan" element={<OperatorRepair />} />
+            <Route path="pengajuan" element={<OperatorReview />} />
           </Route>
           
           {/* FALLBACK 404 */}

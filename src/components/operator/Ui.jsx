@@ -39,10 +39,19 @@ export function PageHeader({ eyebrow, title, description, action }) {
   );
 }
 
-export function StatusPill({ children }) {
+const PILL_TONE = {
+  neutral: { box: 'bg-[#edf3f6] text-[#445665]', dot: 'bg-[#445665]' },
+  error: { box: 'bg-[#fff0f0] text-[#a12b31]', dot: 'bg-[#a12b31]' },
+  success: { box: 'bg-[#e8f3f0] text-[#126552]', dot: 'bg-[#126552]' },
+};
+
+export function StatusPill({ tone = 'neutral', children }) {
+  const style = PILL_TONE[tone];
   return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-[#edf3f6] px-3 py-1.5 text-[11px] font-medium uppercase leading-4 text-[#445665]">
-      <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#445665]" />
+    <span
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium uppercase leading-4 ${style.box}`}
+    >
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${style.dot}`} />
       {children}
     </span>
   );

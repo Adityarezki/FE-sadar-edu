@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Database, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
+import { isProvenanceComplete } from '../../lib/operatorImport';
 import {
   BTN_PRIMARY,
   CARD,
@@ -81,6 +82,8 @@ export default function OperatorDashboard() {
   const activity = useOperatorStore((state) => state.activity);
 
   const validation = useOperatorStore((state) => state.validation);
+  const provenance = useOperatorStore((state) => state.provenance);
+  const submission = useOperatorStore((state) => state.submission);
   const countByStatus = (status) => versions.filter((version) => version.status === status).length;
 
   // Angka baru muncul setelah ada validasi, sebelum itu tampil penanda kosong.
@@ -112,7 +115,22 @@ export default function OperatorDashboard() {
               : `Semua ${validation.totalRows} baris lolos aturan.`,
         }
       : ALERTS[0],
-    ...ALERTS.slice(1),
+    isProvenanceComplete(provenance)
+      ? {
+          icon: Database,
+          tone: 'bg-[#2c6e8e]',
+          title: 'Provenance lengkap',
+          text: 'Sumber, periode, cakupan, dan lisensi sudah diisi.',
+        }
+      : ALERTS[1],
+    submission
+      ? {
+          icon: ShieldCheck,
+          tone: 'bg-[#1b4965]',
+          title: 'Pengajuan aktif',
+          text: `${submission.fileName} menunggu peninjauan Dinas.`,
+        }
+      : ALERTS[2],
   ];
 
   return (
@@ -223,12 +241,14 @@ export default function OperatorDashboard() {
                   </tr>
                 ))
               )}
-              <tr>
-                <td className={TD}>Pengajuan</td>
-                <td className={TD}>Belum ada pengajuan</td>
-                <td className={TD}>{EMPTY}</td>
-                <td className={TD}>Belum dimulai</td>
-              </tr>
+              {!activity.some((item) => item.stage === 'Pengajuan') && (
+                <tr>
+                  <td className={TD}>Pengajuan</td>
+                  <td className={TD}>Belum ada pengajuan</td>
+                  <td className={TD}>{EMPTY}</td>
+                  <td className={TD}>Belum dimulai</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

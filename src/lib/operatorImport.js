@@ -251,3 +251,44 @@ export function validateProposal(field, text, mapping) {
 
   return { ok: false, message: 'Jenis temuan ini belum bisa diperbaiki.' };
 }
+
+// Isian provenance yang tampil di halaman publik (halaman Review pengajuan).
+export const PROVENANCE_FIELDS = [
+  { key: 'source', label: 'Sumber dataset', required: true },
+  { key: 'period', label: 'Periode data', required: true },
+  { key: 'scope', label: 'Cakupan wilayah', required: true },
+  { key: 'license', label: 'Lisensi penggunaan', required: true },
+  { key: 'attribution', label: 'Atribusi peta dasar', required: false },
+  { key: 'note', label: 'Catatan pembaruan', required: false },
+];
+
+export const EMPTY_PROVENANCE = {
+  source: '',
+  period: '',
+  scope: '',
+  license: '',
+  attribution: '',
+  note: '',
+};
+
+const filled = (value) => (value ?? '').trim() !== '';
+
+export function isProvenanceComplete(provenance) {
+  return PROVENANCE_FIELDS.filter((field) => field.required).every((field) => filled(provenance[field.key]));
+}
+
+// Lima gerbang yang harus terbuka sebelum dataset boleh diajukan.
+export function getSubmissionGates({ draft, validation, provenance }) {
+  const needsFix = validation?.needsFixRows ?? 0;
+  return [
+    { name: 'Dataset dipilih', passed: Boolean(draft), detail: draft ? draft.fileName : '' },
+    { name: 'Validasi selesai', passed: Boolean(validation), detail: '' },
+    {
+      name: 'Anomali ditinjau',
+      passed: Boolean(validation) && needsFix === 0,
+      detail: validation && needsFix > 0 ? `${needsFix} baris perlu perbaikan` : '',
+    },
+    { name: 'Provenance lengkap', passed: isProvenanceComplete(provenance), detail: '' },
+    { name: 'Atribusi tersedia', passed: filled(provenance.attribution), detail: '' },
+  ];
+}
