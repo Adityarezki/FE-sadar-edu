@@ -13,6 +13,7 @@ import OperatorImport from "./pages/operator/OperatorImport";
 import OperatorValidation from "./pages/operator/OperatorValidation";
 
 
+
 // Import Komponen Loader & Transisi
 import AwwwardsLoader from "./components/ui/AwwwardsLoader";
 import PageTransition from "./components/ui/PageTransition";
@@ -89,6 +90,7 @@ export default function App() {
             <Route path="dataset" element={<OperatorDataset />} />
             <Route path="dataset/impor" element={<OperatorImport />} />
             <Route path="validasi" element={<OperatorValidation />} />
+            <Route path="validasi/perbaikan" element={<OperatorRepair />} />
           </Route>
           
           {/* FALLBACK 404 */}
