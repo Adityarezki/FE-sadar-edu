@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { FOCUS } from './ui';
+import logoSadar from '../../assets/figma/logo-sadar.svg';
 
 // Item tanpa `to` belum punya halaman, jadi tampil nonaktif.
 const NAV_ITEMS = [
@@ -44,7 +45,7 @@ function BrandMark() {
         </span>
       ) : (
         <img
-          src="/logo-sadar-edu.svg"
+          src={logoSadar}
           alt=""
           width="34"
           height="34"
