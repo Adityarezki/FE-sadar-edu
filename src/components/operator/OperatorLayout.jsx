@@ -22,7 +22,7 @@ const NAV_ITEMS = [
   { label: 'Ringkasan', title: 'Dashboard', to: '/operator/dashboard', icon: House },
   { label: 'Dataset sekolah', title: 'Dataset sekolah', to: '/operator/dataset', icon: Database },
   { label: 'Validasi data', title: 'Validasi data', to: '/operator/validasi', icon: ShieldCheck },
-  { label: 'Indikator & metadata', icon: ChartColumn },
+  { label: 'Indikator & metadata', title: 'Indikator & metadata', to: '/operator/indikator', icon: ChartColumn },
   { label: 'Status pengajuan', title: 'Review pengajuan', to: '/operator/pengajuan', icon: Clock },
 ];
 
