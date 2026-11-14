@@ -9,6 +9,13 @@ import StakeholderDashboard from "./pages/stakeholder/StakeholderDashboard";
 import OperatorDashboard from "./pages/operator/OperatorDashboard";
 import OperatorLogin from "./pages/operator/OperatorLogin";
 import EksplorasiPeta from "./pages/public/EksplorasiPeta";
+import OperatorImport from "./pages/operator/OperatorImport";
+import OperatorValidation from "./pages/operator/OperatorValidation";
+import OperatorRepair from "./pages/operator/OperatorRepair";
+import OperatorReview from "./pages/operator/OperatorReview";
+import OperatorStatus from "./pages/operator/OperatorStatus";
+import OperatorIndicator from "./pages/operator/OperatorIndicator";
+
 
 
 // Import Komponen Loader & Transisi
@@ -82,9 +89,15 @@ export default function App() {
           {/* FLOW OPERATOR */}
           <Route path="/operator/login" element={<OperatorLogin />} />
           <Route path="/operator" element={<OperatorLayout />}>
-          <Route index element={<Navigate to="/operator/dashboard" replace />} />
-          <Route path="dashboard" element={<OperatorDashboard />} />
-          <Route path="dataset" element={<OperatorDataset />} />
+            <Route index element={<Navigate to="/operator/dashboard" replace />} />
+            <Route path="dashboard" element={<OperatorDashboard />} />
+            <Route path="dataset" element={<OperatorDataset />} />
+            <Route path="dataset/impor" element={<OperatorImport />} />
+            <Route path="validasi" element={<OperatorValidation />} />
+            <Route path="validasi/perbaikan" element={<OperatorRepair />} />
+            <Route path="pengajuan" element={<OperatorReview />} />
+            <Route path="status" element={<OperatorStatus />} />
+            <Route path="indikator" element={<OperatorIndicator />} />
           </Route>
           
           {/* FALLBACK 404 */}

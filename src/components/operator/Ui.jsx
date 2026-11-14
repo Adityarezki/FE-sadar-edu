@@ -39,16 +39,25 @@ export function PageHeader({ eyebrow, title, description, action }) {
   );
 }
 
-export function StatusPill({ children }) {
+const PILL_TONE = {
+  neutral: { box: 'bg-[#edf3f6] text-[#445665]', dot: 'bg-[#445665]' },
+  error: { box: 'bg-[#fff0f0] text-[#a12b31]', dot: 'bg-[#a12b31]' },
+  success: { box: 'bg-[#e8f3f0] text-[#126552]', dot: 'bg-[#126552]' },
+};
+
+export function StatusPill({ tone = 'neutral', children }) {
+  const style = PILL_TONE[tone];
   return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-[#edf3f6] px-3 py-1.5 text-[11px] font-medium uppercase leading-4 text-[#445665]">
-      <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[#445665]" />
+    <span
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-medium uppercase leading-4 ${style.box}`}
+    >
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${style.dot}`} />
       {children}
     </span>
   );
 }
 
-export function Dialog({ title, onClose, focusRef, children }) {
+export function Dialog({ title, onClose, focusRef, wide = false, children }) {
   const boxRef = useRef(null);
   const titleId = useId();
 
@@ -77,11 +86,24 @@ export function Dialog({ title, onClose, focusRef, children }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 text-[#173042] shadow-xl outline-none"
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl bg-white p-6 text-[#173042] shadow-xl outline-none ${
+          wide ? 'max-w-2xl' : 'max-w-md'
+        }`}
       >
         <h2 id={titleId} className="text-lg font-bold">{title}</h2>
         {children}
       </div>
+    </div>
+  );
+}
+
+export function MetricCard({ label, value, note, accent }) {
+  return (
+    <div className={`${CARD} relative min-h-[112px] overflow-hidden px-[17px] py-[17px]`}>
+      <span aria-hidden="true" className={`absolute left-0 top-0 h-full w-1 ${accent}`} />
+      <p className="text-xs leading-[18px] text-[#445665]">{label}</p>
+      <p className="mt-1.5 text-[28px] font-bold leading-9 text-[#173042]">{value}</p>
+      <p className="mt-1 text-[11px] font-medium leading-4 text-[#445665]">{note}</p>
     </div>
   );
 }

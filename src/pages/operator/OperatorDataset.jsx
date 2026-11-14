@@ -1,10 +1,10 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Database, Search } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
 import {
   BTN_PRIMARY,
   CARD,
-  Dialog,
   EMPTY,
   FOCUS,
   PageHeader,
@@ -37,26 +37,40 @@ const PLACEHOLDER_ROW = {
   status: 'Belum tersedia',
 };
 
-const STATUS_FILTERS = ['Menunggu validasi', 'Siap digunakan', 'Belum tersedia'];
-const EMPTY_FORM = { fileName: '', name: '', source: '', period: '' };
+const STATUS_FILTERS = ['Draf', 'Perlu perbaikan', 'Siap ditinjau', 'Diajukan', 'Siap digunakan', 'Belum tersedia'];
 
-const fieldClass = `h-11 w-full rounded-lg border border-[#d7e1e8] bg-white px-[13px] text-sm text-[#173042] placeholder:text-[#445665] ${FOCUS}`;
+const STATUS_TONE = {
+  'Siap digunakan': 'text-[#126552]',
+  'Siap ditinjau': 'text-[#126552]',
+  Diajukan: 'text-[#2c6e8e]',
+  'Perlu perbaikan': 'text-[#85520c]',
+  'Belum tersedia': 'text-[#445665]',
+};
 
 export default function OperatorDataset() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const versions = useOperatorStore((state) => state.versions);
-  const importVersion = useOperatorStore((state) => state.importVersion);
 
-  const [query, setQuery] = useState('');
+  const query = searchParams.get('q') ?? '';
   const [statusFilter, setStatusFilter] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
+
+  const goToImport = () => navigate('/operator/dataset/impor');
 
   const rows = useMemo(() => {
     const keyword = query.trim().toLowerCase();
-    const all = [...versions, ...(versions.length === 0 ? [PLACEHOLDER_ROW] : []), TEMPLATE_ROW];
+    const fromStore = versions.map((version) => ({
+      ...version,
+      source: version.source ?? EMPTY,
+      period: version.period ?? EMPTY,
+    }));
+    const all = [...fromStore, ...(versions.length === 0 ? [PLACEHOLDER_ROW] : []), TEMPLATE_ROW];
     return all.filter(
       (row) =>
         (statusFilter === '' || row.status === statusFilter) &&
-        `${row.name} ${row.source}`.toLowerCase().includes(keyword)
+        `${row.name} ${row.fileName ?? ''} ${row.source} ${row.period} ${row.status}`
+          .toLowerCase()
+          .includes(keyword)
     );
   }, [versions, query, statusFilter]);
 
@@ -67,11 +81,7 @@ export default function OperatorDataset() {
         title="Kelola dataset sekolah"
         description="Pilih versi sumber, periksa metadata, lalu mulai impor atau pembaruan."
         action={
-          <button
-            type="button"
-            onClick={() => setIsImporting(true)}
-            className={`${BTN_PRIMARY} w-[172px]`}
-          >
+          <button type="button" onClick={goToImport} className={`${BTN_PRIMARY} w-[172px]`}>
             Impor / perbarui
           </button>
         }
@@ -90,7 +100,12 @@ export default function OperatorDataset() {
             type="search"
             placeholder="Cari nama file atau versi dataset"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const nextParams = new URLSearchParams(searchParams);
+              if (e.target.value) nextParams.set('q', e.target.value);
+              else nextParams.delete('q');
+              setSearchParams(nextParams, { replace: true });
+            }}
             className={`h-11 w-full rounded-lg border border-[#d7e1e8] bg-white pl-[43px] pr-3 text-xs placeholder:text-[#445665] ${FOCUS}`}
           />
         </div>
@@ -118,7 +133,12 @@ export default function OperatorDataset() {
           <h2 id="judul-versi" className="text-base font-semibold leading-6">Versi dataset</h2>
           <p className="text-xs leading-[18px] text-[#445665]">Riwayat sumber dan status pemrosesan.</p>
 
-          <div className="mt-5 overflow-x-auto">
+          <div
+            role="region"
+            aria-label="Tabel versi dataset"
+            tabIndex={0}
+            className={`mt-5 overflow-x-auto ${FOCUS}`}
+          >
             <table className="w-full min-w-[560px] text-left">
               <thead>
                 <tr>
@@ -134,13 +154,7 @@ export default function OperatorDataset() {
                     <td className={TD}>{row.name}</td>
                     <td className={TD}>{row.source}</td>
                     <td className={TD}>{row.period}</td>
-                    <td
-                      className={`${TD} ${
-                        row.status === 'Siap digunakan' ? 'text-[#126552]' : ''
-                      } ${row.status === 'Belum tersedia' ? 'text-[#445665]' : ''}`}
-                    >
-                      {row.status}
-                    </td>
+                    <td className={`${TD} ${STATUS_TONE[row.status] ?? ''}`}>{row.status}</td>
                   </tr>
                 ))}
               </tbody>
@@ -161,11 +175,7 @@ export default function OperatorDataset() {
                   Impor CSV atau XLSX, lalu petakan kolom wajib.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsImporting(true)}
-                className={`${BTN_PRIMARY} w-[170px]`}
-              >
+              <button type="button" onClick={goToImport} className={`${BTN_PRIMARY} w-[170px]`}>
                 Mulai impor
               </button>
             </div>
@@ -191,121 +201,6 @@ export default function OperatorDataset() {
           </ul>
         </section>
       </div>
-
-      {isImporting && (
-        <ImportDialog
-          onClose={() => setIsImporting(false)}
-          onSubmit={(data) => {
-            importVersion(data);
-            setIsImporting(false);
-          }}
-        />
-      )}
     </div>
-  );
-}
-
-function ImportDialog({ onClose, onSubmit }) {
-  const fileRef = useRef(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setForm((prev) => ({
-      ...prev,
-      fileName: file.name,
-      name: prev.name || file.name.replace(/\.[^.]+$/, ''),
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit({
-      fileName: form.fileName,
-      name: form.name.trim(),
-      source: form.source.trim(),
-      period: form.period.trim(),
-    });
-  };
-
-  return (
-    <Dialog title="Impor dataset sekolah" onClose={onClose} focusRef={fileRef}>
-      <p className="mt-1 text-xs leading-[18px] text-[#445665]">
-        Format yang didukung: CSV dan XLSX. Berkas belum dikirim ke server, jadi versi hanya tercatat
-        di halaman ini. Pemetaan kolom wajib dan validasi berjalan setelah server tersambung.
-      </p>
-
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
-        <div>
-          <label htmlFor="impor-berkas" className="mb-1.5 block text-[11px] font-medium text-[#445665]">
-            Berkas dataset
-          </label>
-          <input
-            id="impor-berkas"
-            ref={fileRef}
-            type="file"
-            required
-            accept=".csv,.xlsx"
-            onChange={handleFile}
-            className={`${fieldClass} h-auto cursor-pointer py-2.5 text-xs`}
-          />
-        </div>
-        <div>
-          <label htmlFor="impor-nama" className="mb-1.5 block text-[11px] font-medium text-[#445665]">
-            Nama / versi
-          </label>
-          <input
-            id="impor-nama"
-            type="text"
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className={fieldClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="impor-sumber" className="mb-1.5 block text-[11px] font-medium text-[#445665]">
-            Sumber
-          </label>
-          <input
-            id="impor-sumber"
-            type="text"
-            required
-            placeholder="Contoh: Dapodik Kemdikbud"
-            value={form.source}
-            onChange={(e) => setForm({ ...form, source: e.target.value })}
-            className={fieldClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="impor-periode" className="mb-1.5 block text-[11px] font-medium text-[#445665]">
-            Periode
-          </label>
-          <input
-            id="impor-periode"
-            type="text"
-            required
-            placeholder="Contoh: Semester ganjil 2025/2026"
-            value={form.period}
-            onChange={(e) => setForm({ ...form, period: e.target.value })}
-            className={fieldClass}
-          />
-        </div>
-
-        <div className="mt-1 flex justify-end gap-2 border-t border-[#d7e1e8] pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className={`h-[42px] cursor-pointer rounded-lg border border-[#d7e1e8] bg-white px-5 text-sm font-semibold text-[#173042] hover:bg-[#edf3f6] ${FOCUS}`}
-          >
-            Batal
-          </button>
-          <button type="submit" className={BTN_PRIMARY}>
-            Tambahkan versi
-          </button>
-        </div>
-      </form>
-    </Dialog>
   );
 }
