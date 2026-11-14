@@ -75,10 +75,22 @@ export const useOperatorStore = create((set, get) => ({
     }));
   },
 
-  setCorrection: (key, correction) =>
+  setCorrection: (key, correction) => {
+    const at = new Date().toISOString();
     set((state) => ({
       corrections: { ...state.corrections, [key]: { ...correction, status: 'Diusulkan' } },
-    })),
+      activity: [
+        {
+          id: `A-${Date.now()}`,
+          stage: 'Perbaikan',
+          text: `Mengusulkan perubahan untuk baris ${correction.line}`,
+          at,
+          status: 'Diusulkan',
+        },
+        ...state.activity,
+      ],
+    }));
+  },
 
   // Menulis semua usulan ke baris draf. Mengembalikan draf yang sudah diperbarui.
   applyCorrections: () => {

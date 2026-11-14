@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Database, Search } from 'lucide-react';
 import { useOperatorStore } from '../../store/useOperatorStore';
 import {
@@ -49,9 +49,10 @@ const STATUS_TONE = {
 
 export default function OperatorDataset() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const versions = useOperatorStore((state) => state.versions);
 
-  const [query, setQuery] = useState('');
+  const query = searchParams.get('q') ?? '';
   const [statusFilter, setStatusFilter] = useState('');
 
   const goToImport = () => navigate('/operator/dataset/impor');
@@ -67,7 +68,9 @@ export default function OperatorDataset() {
     return all.filter(
       (row) =>
         (statusFilter === '' || row.status === statusFilter) &&
-        `${row.name} ${row.source}`.toLowerCase().includes(keyword)
+        `${row.name} ${row.fileName ?? ''} ${row.source} ${row.period} ${row.status}`
+          .toLowerCase()
+          .includes(keyword)
     );
   }, [versions, query, statusFilter]);
 
@@ -97,7 +100,12 @@ export default function OperatorDataset() {
             type="search"
             placeholder="Cari nama file atau versi dataset"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const nextParams = new URLSearchParams(searchParams);
+              if (e.target.value) nextParams.set('q', e.target.value);
+              else nextParams.delete('q');
+              setSearchParams(nextParams, { replace: true });
+            }}
             className={`h-11 w-full rounded-lg border border-[#d7e1e8] bg-white pl-[43px] pr-3 text-xs placeholder:text-[#445665] ${FOCUS}`}
           />
         </div>
